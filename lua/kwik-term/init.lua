@@ -6,6 +6,10 @@ M.config = {
 	height_ratio = 0.9, -- Float height (0.1 to 1.0)
 	border = "single", -- "single", "rounded", "double", "solid"
 	start_in_insert = true, -- Start typing immediately when opened
+	keymaps = {
+		hide = "q", -- Hides Terminal Window
+		exit_terminal_mode = "<Esc><Esc>", -- Returns to Normal Mode
+	},
 }
 
 local terminal_buf = nil
@@ -59,10 +63,24 @@ local function setup_terminal_buffer(buf)
 		end,
 	})
 
+	local hide_key = M.config.keymaps.hide
 	-- 'q' in normal mode hides the window
-	vim.keymap.set("n", "q", function()
+	vim.keymap.set("n", hide_key, function()
 		M.hide()
-	end, { buffer = buf, silent = true, desc = "Hide kwik-term" })
+	end, {
+		buffer = buf,
+		silent = true,
+		desc = "Hide kwik-term",
+	})
+
+	local exit_key = M.config.keymaps.exit_terminal_mode
+	if exit_key then
+		vim.keymap.set("t", exit_key, "<C-\\><C-n>", {
+			buffer = buf,
+			silent = true,
+			desc = "Exit terminal mode",
+		})
+	end
 end
 
 ---Open terminal (or focus if already open)

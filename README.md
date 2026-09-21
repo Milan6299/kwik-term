@@ -10,6 +10,7 @@ A lightweight Neovim terminal plugin for quickly opening, toggling, and sending 
 * Send arbitrary commands to the terminal
 * Run the current file with a custom command
 * Configurable terminal size and border
+* Configurable terminal keymaps
 * Simple Lua API
 * User commands for quick access
 
@@ -31,9 +32,38 @@ For a GitHub repository:
 ```lua
 {
   "Milan6299/kwik-term",
-  config = function()
-    require("kwik-term").setup()
-  end,
+  opts = {},
+}
+```
+
+Since `kwik-term` provides a `setup()` function, lazy.nvim automatically passes `opts` to it.
+
+### With configuration
+
+```lua
+{
+  "Milan6299/kwik-term",
+  opts = {
+    height = 7,
+    width = 0.9,
+    height_ratio = 0.9,
+    border = "single",
+    start_in_insert = true,
+    keymaps = {
+      hide = "q",
+      exit_terminal_mode = "<Esc><Esc>",
+    },
+  },
+  keys = {
+    {
+      "<leader>tt",
+      function()
+        require("kwik-term").toggle({ float = true })
+      end,
+      mode = "n",
+      desc = "KwikTerm Float",
+    },
+  },
 }
 ```
 
@@ -97,22 +127,39 @@ require("kwik-term").setup({
   height_ratio = 0.9,
   border = "single",
   start_in_insert = true,
+  keymaps = {
+    hide = "q",
+    exit_terminal_mode = "<Esc><Esc>",
+  },
 })
 ```
 
 ### Options
 
-| Option            |    Default | Description                           |
-| ----------------- | ---------: | ------------------------------------- |
-| `height`          |        `7` | Height of the split terminal          |
-| `width`           |      `0.9` | Width ratio of the floating terminal  |
-| `height_ratio`    |      `0.9` | Height ratio of the floating terminal |
-| `border`          | `"single"` | Floating window border                |
-| `start_in_insert` |     `true` | Enter insert mode when opening        |
+| Option                       |        Default | Description                           |
+| ---------------------------- | -------------: | ------------------------------------- |
+| `height`                     |            `7` | Height of the split terminal          |
+| `width`                      |          `0.9` | Width ratio of the floating terminal  |
+| `height_ratio`               |          `0.9` | Height ratio of the floating terminal |
+| `border`                     |     `"single"` | Floating window border                |
+| `start_in_insert`            |         `true` | Enter insert mode when opening        |
+| `keymaps.hide`               |          `"q"` | Hide the terminal window              |
+| `keymaps.exit_terminal_mode` | `"<Esc><Esc>"` | Exit terminal mode                    |
+
+Set a keymap to `false` to disable it:
+
+```lua
+require("kwik-term").setup({
+  keymaps = {
+    hide = false,
+    exit_terminal_mode = false,
+  },
+})
+```
 
 ## Keymaps
 
-`kwik-term` does not impose any global keymaps. Add your own:
+`kwik-term` does not impose any global keymaps. Add your own keymaps using your preferred configuration.
 
 ```lua
 local kwik = require("kwik-term")
@@ -130,6 +177,32 @@ vim.keymap.set("n", "<leader>tr", function()
 end, { desc = "Run current file" })
 ```
 
+### lazy.nvim
+
+You can also define plugin keymaps directly in your lazy.nvim specification:
+
+```lua
+{
+  "Milan6299/kwik-term",
+  opts = {
+    keymaps = {
+      hide = "q",
+      exit_terminal_mode = "<Esc><Esc>",
+    },
+  },
+  keys = {
+    {
+      "<leader>tt",
+      function()
+        require("kwik-term").toggle({ float = true })
+      end,
+      mode = "n",
+      desc = "KwikTerm Float",
+    },
+  },
+}
+```
+
 ## Structure
 
 ```text
@@ -143,13 +216,19 @@ kwik-term/
 
 ## Why?
 
-Sometimes you just need a terminal without leaving your editor. Even though Neovim comes with a terminal command it doesn't have a pre-configured floating window or even a sane keymap (Ctrl + \ + Ctrl + n) for getting back to normal mode.
+Sometimes you just need a terminal without leaving your editor. Although Neovim comes with a built-in terminal, it does not provide a pre-configured floating window or a sane default mapping for returning from terminal mode to normal mode `(Ctrl + \ + Ctrl + n)`.
 
 `kwik-term` provides a small API for keeping a terminal around and sending commands to it without adding a large amount of configuration or terminal-management machinery.
 
-This is mainly designed for quick lookups, scratch terminal, running file commands like `python filename.py` thus making user workflow smooth and fast.
+It is mainly designed for quick lookups, scratch terminal sessions, and running file commands such as:
 
-It is suggested to use complex long running and important tasks in a separate terminal.
+```text
+uv run filename.py
+python filename.py
+npm run dev
+```
+
+For complex, long-running, or important tasks, it is recommended to use a separate terminal.
 
 ## License
 
